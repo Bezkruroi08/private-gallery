@@ -234,26 +234,14 @@
     renderGallery(filtered);
     */
     
-    // Вариант 2: загрузка из JSON (рекомендуется)
-    fetch('data.json')
-        .then(response => response.json())
-        .then(data => {
-            // Фильтрация по дате (последние 30 дней)
-            const now = new Date();
-            const cutoff = new Date();
-            cutoff.setDate(now.getDate() - 30);
-            
-            const filtered = data.items.filter(item => {
-                if (!item.date) return true; // если даты нет, показываем
-                return new Date(item.date) > cutoff;
-            });
-            
-            renderGallery(filtered);
-        })
-        .catch(error => {
-            console.error('Ошибка загрузки:', error);
-            gallery.innerHTML = '<p style="color:white; text-align:center;">Ошибка загрузки контента. Проверьте подключение.</p>';
-        });
+    // Прямой массив с видео
+    const items = [
+        { type: "video", url: "https://files.catbox.moe/se1u8n.mp4", name: "Видео 1" },
+        { type: "video", url: "https://files.catbox.moe/rwlecl.mp4", name: "Видео 2" },
+        { type: "video", url: "https://files.catbox.moe/mn1bxf.mp4", name: "Видео 3" }
+    ];
+    
+    renderGallery(items);
 </script>
 </body>
 </html>
