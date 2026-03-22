@@ -101,9 +101,9 @@
             font-size: 14px;
         }
         .item video {
-    background: #1a1a1a url('https://img.icons8.com/ios-filled/50/ffffff/play-button-circled.png') no-repeat center;
-    background-size: 48px;
-}
+            background: #1a1a1a url('https://img.icons8.com/ios-filled/50/ffffff/play-button-circled.png') no-repeat center;
+            background-size: 48px;
+        }
         @media (max-width: 600px) {
             .gallery {
                 grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -124,22 +124,6 @@
     <button onclick="document.getElementById('ageGate').style.display='none'" style="padding:12px 40px; background:#ff4444; color:white; border:none; border-radius:30px; font-size:18px; cursor:pointer;">Мне есть 18 →</button>
 </div>
 
-<!-- ПРОСТАЯ ПАРОЛЬНАЯ ЗАЩИТА (опционально, раскомментируй если нужна) -->
-<!--
-<script>
-    const SITE_PASSWORD = "вашпароль";
-    if(!localStorage.getItem("auth")){
-        const p = prompt("Введите пароль:");
-        if(p === SITE_PASSWORD){
-            localStorage.setItem("auth","true");
-        } else {
-            document.body.innerHTML = "<div style='background:black; color:white; text-align:center; padding:100px;'><h1>🔒 Доступ закрыт</h1><button onclick='location.reload()'>Попробовать снова</button></div>";
-            throw new Error("Access denied");
-        }
-    }
-</script>
--->
-
 <h1>📁 Приватная галерея</h1>
 <div class="gallery" id="gallery"></div>
 
@@ -156,6 +140,14 @@
     const modalTitle = document.getElementById('modalTitle');
     const closeModal = document.getElementById('closeModal');
 
+    // Функция для определения типа медиа по расширению в URL
+    function getMediaType(url) {
+        if (url.endsWith('.mp4') || url.endsWith('.MOV')) {
+            return 'video';
+        }
+        return 'image';
+    }
+
     function renderGallery(items) {
         gallery.innerHTML = '';
         items.forEach((item, index) => {
@@ -163,7 +155,9 @@
             div.className = 'item';
             div.onclick = () => openModal(index, items);
             
-            if (item.type === 'video') {
+            const mediaType = getMediaType(item.url);
+            
+            if (mediaType === 'video') {
                 const video = document.createElement('video');
                 video.src = item.url;
                 video.preload = 'metadata';
@@ -177,7 +171,7 @@
             
             const info = document.createElement('div');
             info.className = 'info';
-            info.textContent = item.name || (item.type === 'video' ? '🎬 Видео' : '📷 Фото');
+            info.textContent = item.name || (mediaType === 'video' ? '🎬 Видео' : '📷 Фото');
             div.appendChild(info);
             
             gallery.appendChild(div);
@@ -188,7 +182,9 @@
         const item = items[index];
         modalContent.innerHTML = '';
         
-        if (item.type === 'video') {
+        const mediaType = getMediaType(item.url);
+        
+        if (mediaType === 'video') {
             const video = document.createElement('video');
             video.src = item.url;
             video.controls = true;
@@ -203,7 +199,7 @@
             modalContent.appendChild(img);
         }
         
-        modalTitle.textContent = item.name || (item.type === 'video' ? 'Видео' : 'Фото');
+        modalTitle.textContent = item.name || (mediaType === 'video' ? 'Видео' : 'Фото');
         modal.classList.add('active');
     }
 
@@ -219,137 +215,124 @@
         }
     };
 
-        closeModal.onclick = () => {
-        modal.classList.remove('active');
-        modalContent.innerHTML = '';
-    };
-
-    modal.onclick = (e) => {
-        if (e.target === modal) {
-            modal.classList.remove('active');
-            modalContent.innerHTML = '';
-        }
-    };
-
-    // Прямой массив с видео (IPFS)
+    // ========== МАССИВ С МЕДИАФАЙЛАМИ (только URL и название) ==========
     const items = [
-        { type: "video", url: "https://bafybeigthleomhx3di7htzs56k6csuvvrp6lddninmsgihyroo6e5r66sy.ipfs.dweb.link/", name: "Видео 1" },
-        { type: "video", url: "https://bafybeihp4pfqavyvj2mpocruzsa6hdp67bs4mdbbw3pwnc6kpliscnsdga.ipfs.dweb.link/", name: "Видео 2" },
-        { type: "video", url: "https://bafybeidwi7eq55eyvti6spr42jgkbszxztgivut4t2g7wtfrusffgadxu4.ipfs.dweb.link/", name: "Видео 3" },
-        { type: "video", url: "https://bafybeiezz3agnv7fgxfuvdyqajrorcu57dbwhncmkbbu52xygjwn2gfpp4.ipfs.dweb.link/", name: "Видео 4" },
-        { type: "video", url: "https://bafybeiaw6dfjrccmp23wh6r7bfzdknasgnvol4s3t4dlqkxeq2w3dxokgq.ipfs.dweb.link/", name: "Видео 5" },
-        { type: "video", url: "https://bafybeibyoju5tdpfur7clmtmn6jv2vwpaeon4j3t6uv6x4ieckj7i27bhq.ipfs.dweb.link/", name: "Видео 6" },
-        { type: "video", url: "https://bafybeicdmh3bd2j2rzhrnv5r4d3gyuq4t2j6fmp3kgrabrz7mffhwucbpq.ipfs.dweb.link/", name: "Видео 7" },
-        { type: "video", url: "https://bafybeigvo7budoi2wk6wsbiblo3cjh25qv7v4z7374tnivckvrgcysrhli.ipfs.dweb.link/", name: "Видео 8" },
-        { type: "video", url: "https://bafybeihfowycykoogcyefvu3gpyo26cfs4ghmb5mr4vef6kaloapkyguci.ipfs.dweb.link/", name: "Видео 9" },
-        { type: "video", url: "https://bafybeiariaps2ytbe2evu6re3yy72ixuukkgxldn6dqvypozlt5wilsjfi.ipfs.dweb.link/", name: "Видео 10" },
-        { type: "video", url: "https://bafybeibt5lrytc47xesfkbolkb2gcu6p5h26myuenvdx76zfufuphhtaye.ipfs.dweb.link/", name: "Видео 11" },
-        { type: "video", url: "https://bafybeialbntkshbxkoxjmtqmha5gqq2mmwfehjyg5nqn5an57bekyi6doq.ipfs.dweb.link/", name: "Видео 12" },
-        { type: "video", url: "https://bafybeiabvxsqwb4lu7d26c5llci3vq7qwjjpvhbz7isnqbyphss5rfvvhy.ipfs.dweb.link/", name: "Видео 13" },
-        { type: "video", url: "https://bafybeiatvut72av2dws6i3qnrctlxdmkjpnsmmvdsegwvjjy465qczlati.ipfs.dweb.link/", name: "Видео 14" },
-        { type: "video", url: "https://bafybeib5lbdy4zcfm43zmh7qvzevr4ujtbova3fsoqx6xiiulefnvgb6ya.ipfs.dweb.link/", name: "Видео 15" },
-        { type: "video", url: "https://bafybeiaosnafnhnrnz5wmldfhuij3i2zjpxzttjimgcjhdwbgkzmmjwama.ipfs.dweb.link/", name: "Видео 16" },
-        { type: "video", url: "https://bafybeiauurji7qfryszkl45qpjrup7tp6ps7lf2vjfeyvhhe6jpo7hvs2i.ipfs.dweb.link/", name: "Видео 17" },
-        { type: "video", url: "https://bafybeid22453quzcslrcldxxpdwhyp74hq7xnudbnoin5spcujugucsite.ipfs.dweb.link/", name: "Видео 18" },
-        { type: "video", url: "https://bafybeicu2hnoleeocnhkpfzjt5zld6zql6duvem7r4jduc5xevjwhivmqe.ipfs.dweb.link/", name: "Видео 19" },
-        { type: "video", url: "https://bafybeia5ez35635jun3fzeamfsu2pi4zd4ti7v6hgiunfwzmrdeshzbdpm.ipfs.dweb.link/", name: "Видео 20" },
-        { type: "video", url: "https://bafybeifk2oyeoq37c7isevqtvar246o2eoaowbvex2i3oktb62jgtrzmca.ipfs.dweb.link/", name: "Видео 21" },
-        { type: "video", url: "https://bafybeifw6j4y5tq4x5fnkgtlidm5ihab5shx7rgjvhekxpghsidijeqnuq.ipfs.dweb.link/", name: "Видео 22" },
-        { type: "video", url: "https://bafybeid7724b7yn2ajef3zfdebr6u2x3se2rrt6g2k4u3mjka5kmzxqtvm.ipfs.dweb.link/", name: "Видео 23" },
-        { type: "video", url: "https://bafybeiaxi7mhdb4ybvczkoyqojem4alsifvcmjmx4pdrolqwu3kgjn3n7i.ipfs.dweb.link/", name: "Видео 24" },
-        { type: "video", url: "https://bafybeiazy7m26arvw5owx7zqixctyzz42yufmzntqv7wkd5vusbrbon54i.ipfs.dweb.link/", name: "Видео 25" },
-        { type: "video", url: "https://bafybeigaxbjfmumbdyz64fm7ye2orci6xsko5nleexqcdc37sge3znwymu.ipfs.dweb.link/", name: "Видео 26" },
-        { type: "video", url: "https://bafybeidmjrunugvf5wmg7typl3ey56kzww2mfjfthz57tq67xbixhq3q2e.ipfs.dweb.link/", name: "Видео 27" },
-        { type: "video", url: "https://bafybeifs6s2v3yeol7kja4sm42ourfxsln7brevm6bgpvg3wsrgx7vyf6q.ipfs.dweb.link/", name: "Видео 28" },
-        { type: "video", url: "https://bafybeidtqsgtbzi4kp7sm3hj5v2kgk3lmr2ln3nrxsb25jtk4ybxdanrfm.ipfs.dweb.link/", name: "Видео 29" },
-        { type: "video", url: "https://bafybeibohnp2ftb6mbpvymbi2fedeidiovy2ewpdszyoykf5ldufpq3fdu.ipfs.dweb.link/", name: "Видео 30" },
-        { type: "image", url: "https://bafkreiehyhngs27r3q6gk3gsppxw2ivsiz4rq42tcmvxcosvisxy7rdhtq.ipfs.dweb.link/", name: "Фото 31" },
-        { type: "image", url: "https://bafkreih6aawb7nzce43odjt6jhsixly7i4wfvmrpczhpxyaasxv6pzems4.ipfs.dweb.link/", name: "Фото 32" },
-        { type: "image", url: "https://bafkreiev3t4rzwuvsq3cbanj4lzc5w57n47q5jlpggw4zjhiv2ianvsh7e.ipfs.dweb.link/", name: "Фото 33" },
-        { type: "image", url: "https://bafkreifzzphtw66nefpm433kqorxjb47a3ipss3v5tffa6qzrttxkqq54q.ipfs.dweb.link/", name: "Фото 34" },
-        { type: "image", url: "https://bafkreietr7eyevir3mlefo2io37hhrbjxzzyb4fjuvsk3s535zuv6uri7u.ipfs.dweb.link/", name: "Фото 35" },
-        { type: "image", url: "https://bafybeifs7hqmtaimnllj3el2unpf5w5iclh6crqykm4l5lxvk3gjmcwzva.ipfs.dweb.link/", name: "Фото 36" },
-        { type: "image", url: "https://bafkreiaaw67kitu5dnvjzhsyqdjp6fwmtnfcbaprhcfmsiqdvmgzgysyl4.ipfs.dweb.link/", name: "Фото 37" },
-        { type: "image", url: "https://bafkreif77r3gutphykjbqs2v5aubdfm72ajqwif55iuiwicaxytopfc3qi.ipfs.dweb.link/", name: "Фото 38" },
-        { type: "image", url: "https://bafybeiezp4csdswaa5xpul4q6dttl7567fhhw5mrnzjikxgrzc5uosizbq.ipfs.dweb.link/", name: "Фото 39" },
-        { type: "video", url: "https://bafybeibqgme7kouqzkpyb2qudqhlibhrufpd3hgrildgqhyqttnnkbcbza.ipfs.dweb.link/", name: "Видео 40" },
-        { type: "video", url: "https://bafybeihsu3yct6v6nwxzvop5mddeqspxwm75zxn4amkzx6b6udkg3lrxbq.ipfs.dweb.link/", name: "Видео 41" },
-        { type: "video", url: "https://bafybeidiggvo5no2n47wpyidiey45oad5cfzw5l3xivgn7i6uo6dusfoxy.ipfs.dweb.link/", name: "Видео 42" },
-        { type: "video", url: "https://bafybeieymbqhuwxxwjt3pwvh6rqnvn3irwrxwblnzv4qi5egrzfifb2ziq.ipfs.dweb.link/", name: "Видео 43" },
-        { type: "video", url: "https://bafybeiheqedkprecmioznqcjoghtaoya2nvmprdedpzsiektygunsaxica.ipfs.dweb.link/", name: "Видео 44" },
-        { type: "video", url: "https://bafybeigwnevzuk5xo53mculqgmtmvo6dmdjnaf3td5pudujjss6c4ec5hu.ipfs.dweb.link/", name: "Видео 45" },
-        { type: "video", url: "https://bafybeieuqio7pvqd6ovlydyb4gfbn4lslrznnd6wblpxakzlic2smk5r5m.ipfs.dweb.link/", name: "Видео 46" },
-        { type: "video", url: "https://bafybeieq5oqqczacvphmsotu2krsp7ubbsz47ulwtwkjab7wgvok3nwumm.ipfs.dweb.link/", name: "Видео 47" },
-        { type: "video", url: "https://bafybeici26lrbpi3u3lptzmxl7fyvgulbgihx3543gygch2qsgg4qpo5gq.ipfs.dweb.link/", name: "Видео 48" },
-        { type: "video", url: "https://bafybeif3dxkthpgg53476is36oidtwbddysb4tb6u5xzz2r6l22zfyelq4.ipfs.dweb.link/", name: "Видео 49" },
-        { type: "video", url: "https://bafybeibkbdb7no4zfkj6lyxuphqm3u5xq7zp4vjn5n2inuk62ec7qml6v4.ipfs.dweb.link/", name: "Видео 50" },
-        { type: "video", url: "https://bafybeifekfi5zvcxoh5tvencrvxnczam7fnmiq4jkwkwqt7drdzmk2klle.ipfs.dweb.link/", name: "Видео 51" },
-        { type: "video", url: "https://bafybeifvjpevhymb7ooa2jlw5zy3pu35gv6zsgyc6lduetwprwqfd624ha.ipfs.dweb.link/", name: "Видео 52" },
-        { type: "video", url: "https://bafybeihfx5kzzpgvcbtbdwdrnzj6i7kh65s3pdhs7muzxrqnubjkwdj62m.ipfs.dweb.link/", name: "Видео 53" },
-        { type: "video", url: "https://bafybeieo66egiifatqtrs7pcsewn7ehvne3xv5gtgrxwox3nkrxsijmswm.ipfs.dweb.link/", name: "Видео 54" },
-        { type: "video", url: "https://bafybeiep3kqjldubd7iczexiyisosfubhf2hykitxjj2hm7evk6z6q3rgq.ipfs.dweb.link/", name: "Видео 55" },
-        { type: "video", url: "https://bafybeicfmyhzkm7hg6bswplgddyp6up6mzns6kgji7icx3vp4sprqd3c5i.ipfs.dweb.link/", name: "Видео 56" },
-        { type: "video", url: "https://bafybeighvnvqqr6luxv24ahrava7nk3ihuirxm2m33jqsgbdq6t6c6jlru.ipfs.dweb.link/", name: "Видео 57" },
-        { type: "video", url: "https://bafybeicxkllqlhp7oogdoidrc5ybuhvuylaqezgy2rfbubfgsxni5c3wk4.ipfs.dweb.link/", name: "Видео 58" },
-        { type: "video", url: "https://bafybeicmacz6qb464zhtd4m7mztqvu6krxspbwnah5ojgj6air4qyka7eq.ipfs.dweb.link/", name: "Видео 59" },
-        { type: "video", url: "https://bafybeicz2pbsjmivwieaneuomxj3ajejikmc7ftozavbxqxprwhtwqdkwu.ipfs.dweb.link/", name: "Видео 60" },
-        { type: "video", url: "https://bafybeiayzx7t5vbhm4tu2mdh6c3bmzejardow3oftn3neit4kaetb5je2e.ipfs.dweb.link/", name: "Видео 61" },
-        { type: "video", url: "https://bafybeienbwy2jjzoyysjk4xnmqqecf766p6pmniinz3tfkamynpxq5m4xi.ipfs.dweb.link/", name: "Видео 62" },
-        { type: "video", url: "https://bafybeic3pk63m3p6a7jvaiiyzo2fkti2fksgqsi5a2s5kyteg3yntsajsu.ipfs.dweb.link/", name: "Видео 63" },
-        { type: "video", url: "https://bafybeifk7rd2zb7t5ba2mdfnfidceakubukwteuzqqzx2xok2ms6tvkvki.ipfs.dweb.link/", name: "Видео 64" },
-        { type: "video", url: "https://bafybeiedzqvbcaz23xpko2ay2t25lewg6ck2lamrspbcod43uyo7gqtyi4.ipfs.dweb.link/", name: "Видео 65" },
-        { type: "video", url: "https://bafybeicvddo2avulf34hox3qlmqljqeeu4d6lcrpncfyswlmmkdwv3dys4.ipfs.dweb.link/", name: "Видео 66" },
-        { type: "video", url: "https://bafybeidc6xb2vkoiyq6x6slotg5vt7uyyaj5qjt33e235eeok4f7y3lo7q.ipfs.dweb.link/", name: "Видео 67" },
-        { type: "video", url: "https://bafybeiczogyrd2dfgpe4dw2hjc6bgslhubz32kzgw3fwgtkvpzynysee2u.ipfs.dweb.link/", name: "Видео 68" },
-        { type: "video", url: "https://bafybeibgd7cqowfbbsqm44enjbu7np4etytsptqbuw2iwfdfvpk72qnqiy.ipfs.dweb.link/", name: "Видео 69" },
-        { type: "video", url: "https://bafybeidfz57xv7qzqgtapknxbf2lwtsdbxak4eh4dy2yrc32j4dpibzftm.ipfs.dweb.link/", name: "Видео 70" },
-        { type: "video", url: "https://bafybeialau3yubpib623ev7gzgociomnz6ehkpaofljejsqnrkpqjk3tae.ipfs.dweb.link/", name: "Видео 71" },
-        { type: "video", url: "https://bafybeiggd6gs2v4onis6rvumuts55m4w7hpn7jxzfuz4p7kpc5loxytlp4.ipfs.dweb.link/", name: "Видео 72" },
-        { type: "video", url: "https://bafybeif7urom2nyv4iiyfc5ahi7zaara7pv3t7vhgogagng52mkfgtnbi4.ipfs.dweb.link/", name: "Видео 73" },
-        { type: "video", url: "https://bafybeigs3tmjbstt2ox6b36endjag3yvounnhivcnwryf43tu2jhqwgcwa.ipfs.dweb.link/", name: "Видео 74" },
-        { type: "video", url: "https://bafybeieq4ckocasitexk4ax4xen2oln25p44gf3piwyaqc3a5xvxj5jdby.ipfs.dweb.link/", name: "Видео 75" },
-        { type: "image", url: "https://bafkreidusganbfrm4g4zcpn3qzxb2vwcwjwg4h466d3iwfdvnlfwgeyta4.ipfs.dweb.link/", name: "Фото 76" },
-        { type: "image", url: "https://bafkreidhajomwfelrc4jszn6ga5hz5sgvlajo7r4lnbdlr77b3trp2plte.ipfs.dweb.link/", name: "Фото 77" },
-        { type: "video", url: "https://bafybeif5bsnirtrgikhfgsbd4xjdqvnb43ddejaigegjkals2c3jkregce.ipfs.dweb.link/", name: "Видео 78" },
-        { type: "video", url: "https://bafybeiexgriagwox7km7evlzt4nojbrfb3qno325pvgua4wb5lau2u3cbm.ipfs.dweb.link/", name: "Видео 79" },
-        { type: "video", url: "https://bafybeidasxafpmdy74s5q7mpp5vqnk7r22da3qkcc3ajttaguq232sbzzm.ipfs.dweb.link/", name: "Видео 80" },
-        { type: "video", url: "https://bafybeiebxl72yosgehwo4tgjvpbhfrnkuff2ycdost6obslrcf7ududh5q.ipfs.dweb.link/", name: "Видео 81" },
-        { type: "video", url: "https://bafybeiciknnxpizgzvq2q37neqxa66axajvz6rlzri5v2fbyapmzj4dxdm.ipfs.dweb.link/", name: "Видео 82" },
-        { type: "video", url: "https://bafybeicab6edalr5psuittovxfyyhd33egmbu4txovwmui72e52hlon6qi.ipfs.dweb.link/", name: "Видео 83" },
-        { type: "video", url: "https://bafybeic4cm5yw7zzrb5gj4dxm2efhhpdjcvz47cwfdxvgqkc6vreq2sa34.ipfs.dweb.link/", name: "Видео 84" },
-        { type: "video", url: "https://bafybeibt4lsd3hczcqdkdk34j3ykhb2u5da2c4475nildsfshdkryjqeru.ipfs.dweb.link/", name: "Видео 85" },
-        { type: "video", url: "https://bafybeihktwepy4vhf57q5wttr5kuvmwxlnkof2judwjwbabjismycf7ft4.ipfs.dweb.link/", name: "Видео 86" },
-        { type: "video", url: "https://bafybeiat56faeftx6iuob2n5bcdxwq66uka65hvmeqjfm5yj6zgp5ycn7i.ipfs.dweb.link/", name: "Видео 87" },
-        { type: "video", url: "https://bafybeiboxxt3go4obtm6d5cguqy34g66hze2g2ijijsbz63papzflvd2sm.ipfs.dweb.link/", name: "Видео 88" },
-        { type: "video", url: "https://bafybeify3ci7tw2e67rov2t35jdmcalc4olgsgea3zny4psg4d2zbvemu4.ipfs.dweb.link/", name: "Видео 89" },
-        { type: "video", url: "https://bafybeicft2gq644qxr42glljcb6xz6iyhsbualz2wznojs2b7fyq2nyc5i.ipfs.dweb.link/", name: "Видео 90" },
-        { type: "video", url: "https://bafybeidowrogzir2gvtibtree7vkftv3bgyneroleqrkqbiz5t4zdb6ara.ipfs.dweb.link/", name: "Видео 91" },
-        { type: "video", url: "https://bafybeierwvd736gdg7r67jcrjejxzfmb6uyxqxpyqu4pjytcb5xev643zu.ipfs.dweb.link/", name: "Видео 92" },
-        { type: "video", url: "https://bafybeib2wfh3bw6gl2o43zhoyet3gll4bzmbu44e2s7yo36xj4tvhhaof4.ipfs.dweb.link/", name: "Видео 93" },
-        { type: "video", url: "https://bafybeibeoowh56hexx7dje6sp7uvrkjyxdb7qp2z34zhmnkibmfe5cxqbm.ipfs.dweb.link/", name: "Видео 94" },
-        { type: "video", url: "https://bafybeibsotdwainc4c4jb36enzf44uiokhhjssp5fw45in7burlawgt27a.ipfs.dweb.link/", name: "Видео 95" },
-        { type: "video", url: "https://bafybeifti5accp2uoa3yjifzktj4plrv2el6xsnk73muve5gkxsglcsbry.ipfs.dweb.link/", name: "Видео 96" },
-        { type: "video", url: "https://bafybeie5yc2yxj62jitd6aypszzedypge4qrsxuolpomugvplqt3vv7f6i.ipfs.dweb.link/", name: "Видео 97" },
-        { type: "video", url: "https://bafybeidmwx6hduko55ht62rxmxyiceh2l4ibpupgu7bu7fnp3yjq6n6ynq.ipfs.dweb.link/", name: "Видео 98" },
-        { type: "video", url: "https://bafybeibkw4lkxwpe2e3jgp5nhvpiytehvl7nltup6shgb47oqljtaxvqy4.ipfs.dweb.link/", name: "Видео 99" },
-        { type: "video", url: "https://bafybeiacd6mqtx3cw6ak7u5varmv4xyxwbztpqol7wtedrybe6llkmoxia.ipfs.dweb.link/", name: "Видео 100" },
-        { type: "video", url: "https://bafybeih7jlvjdnoeuviik5g5g4w6yxstofpgmujrtaizc3zh6hliddea7y.ipfs.dweb.link/", name: "Видео 101" },
-        { type: "video", url: "https://bafybeiaqcurhjwonzk3cxywf6qhhv7ybqdigis4myedvkor4skxxi4oxku.ipfs.dweb.link/", name: "Видео 102" },
-        { type: "video", url: "https://bafybeigddboaufes35k5ooqttq6brsc4x7wz2dlpc3nrfxaa5craunhory.ipfs.dweb.link/", name: "Видео 103" },
-        { type: "video", url: "https://bafybeibrqyp7qfbg4lwjnvbnokg5fiesfgojfvv7ntxo5luo5o5n6f6uru.ipfs.dweb.link/", name: "Видео 104" },
-        { type: "video", url: "https://bafybeicmqpang2nxqikeso7qskvrdeczr7ij2wm64tvd5h74kmjyjxidxm.ipfs.dweb.link/", name: "Видео 105" },
-        { type: "video", url: "https://bafybeid5xxor2smqbtxxknevncuwvvc6ovqvsfgk3t66hycil5sr4nijze.ipfs.dweb.link/", name: "Видео 106" },
-        { type: "video", url: "https://bafybeidqul64ak553j45tbl5femodj6hxwa7gzd3wgdrpd563clnicrmw4.ipfs.dweb.link/", name: "Видео 107" },
-        { type: "video", url: "https://bafybeievbs7emolubz62pa2f25klgqknbvv3lvbfs4pgn6t2t4sptaivx4.ipfs.dweb.link/", name: "Видео 108" },
-        { type: "video", url: "https://bafybeidyij5ij4bafakcwdvb3katnytqwyjbbwx27ub3wws3uh3u5pm6iu.ipfs.dweb.link/", name: "Видео 109" },
-        { type: "video", url: "https://bafybeicrkvkfrqbw4jtjrrvj3ogmvtrbz43fgx7khcykkbig6e44h2egyi.ipfs.dweb.link/", name: "Видео 110" },
-        { type: "video", url: "https://bafybeihwnafe3mdswkmwyggckca4tdieoyr66o44kqssgco4kmp7av4cpa.ipfs.dweb.link/", name: "Видео 111" },
-        { type: "video", url: "https://bafybeife5utwjufyru47hrzmwiyewdyna4pbtz7qqfixjk23l6gfwqage4.ipfs.dweb.link/", name: "Видео 112" },
-        { type: "video", url: "https://bafybeiaso67bctbqj7cpmmiiy5vh76uvrc2o4bkciyoyugbcqswgtbk4na.ipfs.dweb.link/", name: "Видео 113" },
-        { type: "video", url: "https://bafybeicbapztzhj5wq3kd2in2hs3ydsa5lfmqtqvpz3s2sv5lamqnuhm6i.ipfs.dweb.link/", name: "Видео 114" },
-        { type: "video", url: "https://bafybeicg4tu7yidbktchpkizgluea54yoy3tawwc3zuaq46hgc3dmcwi2m.ipfs.dweb.link/", name: "Видео 115" },
-        { type: "video", url: "https://bafybeiawn4jor2srbjfjwk34zji53a23f63kgkedj33mbfkkvhuwi3qcfa.ipfs.dweb.link/", name: "Видео 116" }
-        
+        { url: "https://bafybeigthleomhx3di7htzs56k6csuvvrp6lddninmsgihyroo6e5r66sy.ipfs.dweb.link/", name: "Видео 1" },
+        { url: "https://bafybeihp4pfqavyvj2mpocruzsa6hdp67bs4mdbbw3pwnc6kpliscnsdga.ipfs.dweb.link/", name: "Видео 2" },
+        { url: "https://bafybeidwi7eq55eyvti6spr42jgkbszxztgivut4t2g7wtfrusffgadxu4.ipfs.dweb.link/", name: "Видео 3" },
+        { url: "https://bafybeiezz3agnv7fgxfuvdyqajrorcu57dbwhncmkbbu52xygjwn2gfpp4.ipfs.dweb.link/", name: "Видео 4" },
+        { url: "https://bafybeiaw6dfjrccmp23wh6r7bfzdknasgnvol4s3t4dlqkxeq2w3dxokgq.ipfs.dweb.link/", name: "Видео 5" },
+        { url: "https://bafybeibyoju5tdpfur7clmtmn6jv2vwpaeon4j3t6uv6x4ieckj7i27bhq.ipfs.dweb.link/", name: "Видео 6" },
+        { url: "https://bafybeicdmh3bd2j2rzhrnv5r4d3gyuq4t2j6fmp3kgrabrz7mffhwucbpq.ipfs.dweb.link/", name: "Видео 7" },
+        { url: "https://bafybeigvo7budoi2wk6wsbiblo3cjh25qv7v4z7374tnivckvrgcysrhli.ipfs.dweb.link/", name: "Видео 8" },
+        { url: "https://bafybeihfowycykoogcyefvu3gpyo26cfs4ghmb5mr4vef6kaloapkyguci.ipfs.dweb.link/", name: "Видео 9" },
+        { url: "https://bafybeiariaps2ytbe2evu6re3yy72ixuukkgxldn6dqvypozlt5wilsjfi.ipfs.dweb.link/", name: "Видео 10" },
+        { url: "https://bafybeibt5lrytc47xesfkbolkb2gcu6p5h26myuenvdx76zfufuphhtaye.ipfs.dweb.link/", name: "Видео 11" },
+        { url: "https://bafybeialbntkshbxkoxjmtqmha5gqq2mmwfehjyg5nqn5an57bekyi6doq.ipfs.dweb.link/", name: "Видео 12" },
+        { url: "https://bafybeiabvxsqwb4lu7d26c5llci3vq7qwjjpvhbz7isnqbyphss5rfvvhy.ipfs.dweb.link/", name: "Видео 13" },
+        { url: "https://bafybeiatvut72av2dws6i3qnrctlxdmkjpnsmmvdsegwvjjy465qczlati.ipfs.dweb.link/", name: "Видео 14" },
+        { url: "https://bafybeib5lbdy4zcfm43zmh7qvzevr4ujtbova3fsoqx6xiiulefnvgb6ya.ipfs.dweb.link/", name: "Видео 15" },
+        { url: "https://bafybeiaosnafnhnrnz5wmldfhuij3i2zjpxzttjimgcjhdwbgkzmmjwama.ipfs.dweb.link/", name: "Видео 16" },
+        { url: "https://bafybeiauurji7qfryszkl45qpjrup7tp6ps7lf2vjfeyvhhe6jpo7hvs2i.ipfs.dweb.link/", name: "Видео 17" },
+        { url: "https://bafybeid22453quzcslrcldxxpdwhyp74hq7xnudbnoin5spcujugucsite.ipfs.dweb.link/", name: "Видео 18" },
+        { url: "https://bafybeicu2hnoleeocnhkpfzjt5zld6zql6duvem7r4jduc5xevjwhivmqe.ipfs.dweb.link/", name: "Видео 19" },
+        { url: "https://bafybeia5ez35635jun3fzeamfsu2pi4zd4ti7v6hgiunfwzmrdeshzbdpm.ipfs.dweb.link/", name: "Видео 20" },
+        { url: "https://bafybeifk2oyeoq37c7isevqtvar246o2eoaowbvex2i3oktb62jgtrzmca.ipfs.dweb.link/", name: "Видео 21" },
+        { url: "https://bafybeifw6j4y5tq4x5fnkgtlidm5ihab5shx7rgjvhekxpghsidijeqnuq.ipfs.dweb.link/", name: "Видео 22" },
+        { url: "https://bafybeid7724b7yn2ajef3zfdebr6u2x3se2rrt6g2k4u3mjka5kmzxqtvm.ipfs.dweb.link/", name: "Видео 23" },
+        { url: "https://bafybeiaxi7mhdb4ybvczkoyqojem4alsifvcmjmx4pdrolqwu3kgjn3n7i.ipfs.dweb.link/", name: "Видео 24" },
+        { url: "https://bafybeiazy7m26arvw5owx7zqixctyzz42yufmzntqv7wkd5vusbrbon54i.ipfs.dweb.link/", name: "Видео 25" },
+        { url: "https://bafybeigaxbjfmumbdyz64fm7ye2orci6xsko5nleexqcdc37sge3znwymu.ipfs.dweb.link/", name: "Видео 26" },
+        { url: "https://bafybeidmjrunugvf5wmg7typl3ey56kzww2mfjfthz57tq67xbixhq3q2e.ipfs.dweb.link/", name: "Видео 27" },
+        { url: "https://bafybeifs6s2v3yeol7kja4sm42ourfxsln7brevm6bgpvg3wsrgx7vyf6q.ipfs.dweb.link/", name: "Видео 28" },
+        { url: "https://bafybeidtqsgtbzi4kp7sm3hj5v2kgk3lmr2ln3nrxsb25jtk4ybxdanrfm.ipfs.dweb.link/", name: "Видео 29" },
+        { url: "https://bafybeibohnp2ftb6mbpvymbi2fedeidiovy2ewpdszyoykf5ldufpq3fdu.ipfs.dweb.link/", name: "Видео 30" },
+        { url: "https://bafkreiehyhngs27r3q6gk3gsppxw2ivsiz4rq42tcmvxcosvisxy7rdhtq.ipfs.dweb.link/", name: "Фото 31" },
+        { url: "https://bafkreih6aawb7nzce43odjt6jhsixly7i4wfvmrpczhpxyaasxv6pzems4.ipfs.dweb.link/", name: "Фото 32" },
+        { url: "https://bafkreiev3t4rzwuvsq3cbanj4lzc5w57n47q5jlpggw4zjhiv2ianvsh7e.ipfs.dweb.link/", name: "Фото 33" },
+        { url: "https://bafkreifzzphtw66nefpm433kqorxjb47a3ipss3v5tffa6qzrttxkqq54q.ipfs.dweb.link/", name: "Фото 34" },
+        { url: "https://bafkreietr7eyevir3mlefo2io37hhrbjxzzyb4fjuvsk3s535zuv6uri7u.ipfs.dweb.link/", name: "Фото 35" },
+        { url: "https://bafybeifs7hqmtaimnllj3el2unpf5w5iclh6crqykm4l5lxvk3gjmcwzva.ipfs.dweb.link/", name: "Фото 36" },
+        { url: "https://bafkreiaaw67kitu5dnvjzhsyqdjp6fwmtnfcbaprhcfmsiqdvmgzgysyl4.ipfs.dweb.link/", name: "Фото 37" },
+        { url: "https://bafkreif77r3gutphykjbqs2v5aubdfm72ajqwif55iuiwicaxytopfc3qi.ipfs.dweb.link/", name: "Фото 38" },
+        { url: "https://bafybeiezp4csdswaa5xpul4q6dttl7567fhhw5mrnzjikxgrzc5uosizbq.ipfs.dweb.link/", name: "Фото 39" },
+        { url: "https://bafybeibqgme7kouqzkpyb2qudqhlibhrufpd3hgrildgqhyqttnnkbcbza.ipfs.dweb.link/", name: "Видео 40" },
+        { url: "https://bafybeihsu3yct6v6nwxzvop5mddeqspxwm75zxn4amkzx6b6udkg3lrxbq.ipfs.dweb.link/", name: "Видео 41" },
+        { url: "https://bafybeidiggvo5no2n47wpyidiey45oad5cfzw5l3xivgn7i6uo6dusfoxy.ipfs.dweb.link/", name: "Видео 42" },
+        { url: "https://bafybeieymbqhuwxxwjt3pwvh6rqnvn3irwrxwblnzv4qi5egrzfifb2ziq.ipfs.dweb.link/", name: "Видео 43" },
+        { url: "https://bafybeiheqedkprecmioznqcjoghtaoya2nvmprdedpzsiektygunsaxica.ipfs.dweb.link/", name: "Видео 44" },
+        { url: "https://bafybeigwnevzuk5xo53mculqgmtmvo6dmdjnaf3td5pudujjss6c4ec5hu.ipfs.dweb.link/", name: "Видео 45" },
+        { url: "https://bafybeieuqio7pvqd6ovlydyb4gfbn4lslrznnd6wblpxakzlic2smk5r5m.ipfs.dweb.link/", name: "Видео 46" },
+        { url: "https://bafybeieq5oqqczacvphmsotu2krsp7ubbsz47ulwtwkjab7wgvok3nwumm.ipfs.dweb.link/", name: "Видео 47" },
+        { url: "https://bafybeici26lrbpi3u3lptzmxl7fyvgulbgihx3543gygch2qsgg4qpo5gq.ipfs.dweb.link/", name: "Видео 48" },
+        { url: "https://bafybeif3dxkthpgg53476is36oidtwbddysb4tb6u5xzz2r6l22zfyelq4.ipfs.dweb.link/", name: "Видео 49" },
+        { url: "https://bafybeibkbdb7no4zfkj6lyxuphqm3u5xq7zp4vjn5n2inuk62ec7qml6v4.ipfs.dweb.link/", name: "Видео 50" },
+        { url: "https://bafybeifekfi5zvcxoh5tvencrvxnczam7fnmiq4jkwkwqt7drdzmk2klle.ipfs.dweb.link/", name: "Видео 51" },
+        { url: "https://bafybeifvjpevhymb7ooa2jlw5zy3pu35gv6zsgyc6lduetwprwqfd624ha.ipfs.dweb.link/", name: "Видео 52" },
+        { url: "https://bafybeihfx5kzzpgvcbtbdwdrnzj6i7kh65s3pdhs7muzxrqnubjkwdj62m.ipfs.dweb.link/", name: "Видео 53" },
+        { url: "https://bafybeieo66egiifatqtrs7pcsewn7ehvne3xv5gtgrxwox3nkrxsijmswm.ipfs.dweb.link/", name: "Видео 54" },
+        { url: "https://bafybeiep3kqjldubd7iczexiyisosfubhf2hykitxjj2hm7evk6z6q3rgq.ipfs.dweb.link/", name: "Видео 55" },
+        { url: "https://bafybeicfmyhzkm7hg6bswplgddyp6up6mzns6kgji7icx3vp4sprqd3c5i.ipfs.dweb.link/", name: "Видео 56" },
+        { url: "https://bafybeighvnvqqr6luxv24ahrava7nk3ihuirxm2m33jqsgbdq6t6c6jlru.ipfs.dweb.link/", name: "Видео 57" },
+        { url: "https://bafybeicxkllqlhp7oogdoidrc5ybuhvuylaqezgy2rfbubfgsxni5c3wk4.ipfs.dweb.link/", name: "Видео 58" },
+        { url: "https://bafybeicmacz6qb464zhtd4m7mztqvu6krxspbwnah5ojgj6air4qyka7eq.ipfs.dweb.link/", name: "Видео 59" },
+        { url: "https://bafybeicz2pbsjmivwieaneuomxj3ajejikmc7ftozavbxqxprwhtwqdkwu.ipfs.dweb.link/", name: "Видео 60" },
+        { url: "https://bafybeiayzx7t5vbhm4tu2mdh6c3bmzejardow3oftn3neit4kaetb5je2e.ipfs.dweb.link/", name: "Видео 61" },
+        { url: "https://bafybeienbwy2jjzoyysjk4xnmqqecf766p6pmniinz3tfkamynpxq5m4xi.ipfs.dweb.link/", name: "Видео 62" },
+        { url: "https://bafybeic3pk63m3p6a7jvaiiyzo2fkti2fksgqsi5a2s5kyteg3yntsajsu.ipfs.dweb.link/", name: "Видео 63" },
+        { url: "https://bafybeifk7rd2zb7t5ba2mdfnfidceakubukwteuzqqzx2xok2ms6tvkvki.ipfs.dweb.link/", name: "Видео 64" },
+        { url: "https://bafybeiedzqvbcaz23xpko2ay2t25lewg6ck2lamrspbcod43uyo7gqtyi4.ipfs.dweb.link/", name: "Видео 65" },
+        { url: "https://bafybeicvddo2avulf34hox3qlmqljqeeu4d6lcrpncfyswlmmkdwv3dys4.ipfs.dweb.link/", name: "Видео 66" },
+        { url: "https://bafybeidc6xb2vkoiyq6x6slotg5vt7uyyaj5qjt33e235eeok4f7y3lo7q.ipfs.dweb.link/", name: "Видео 67" },
+        { url: "https://bafybeiczogyrd2dfgpe4dw2hjc6bgslhubz32kzgw3fwgtkvpzynysee2u.ipfs.dweb.link/", name: "Видео 68" },
+        { url: "https://bafybeibgd7cqowfbbsqm44enjbu7np4etytsptqbuw2iwfdfvpk72qnqiy.ipfs.dweb.link/", name: "Видео 69" },
+        { url: "https://bafybeidfz57xv7qzqgtapknxbf2lwtsdbxak4eh4dy2yrc32j4dpibzftm.ipfs.dweb.link/", name: "Видео 70" },
+        { url: "https://bafybeialau3yubpib623ev7gzgociomnz6ehkpaofljejsqnrkpqjk3tae.ipfs.dweb.link/", name: "Видео 71" },
+        { url: "https://bafybeiggd6gs2v4onis6rvumuts55m4w7hpn7jxzfuz4p7kpc5loxytlp4.ipfs.dweb.link/", name: "Видео 72" },
+        { url: "https://bafybeif7urom2nyv4iiyfc5ahi7zaara7pv3t7vhgogagng52mkfgtnbi4.ipfs.dweb.link/", name: "Видео 73" },
+        { url: "https://bafybeigs3tmjbstt2ox6b36endjag3yvounnhivcnwryf43tu2jhqwgcwa.ipfs.dweb.link/", name: "Видео 74" },
+        { url: "https://bafybeieq4ckocasitexk4ax4xen2oln25p44gf3piwyaqc3a5xvxj5jdby.ipfs.dweb.link/", name: "Видео 75" },
+        { url: "https://bafkreidusganbfrm4g4zcpn3qzxb2vwcwjwg4h466d3iwfdvnlfwgeyta4.ipfs.dweb.link/", name: "Фото 76" },
+        { url: "https://bafkreidhajomwfelrc4jszn6ga5hz5sgvlajo7r4lnbdlr77b3trp2plte.ipfs.dweb.link/", name: "Фото 77" },
+        { url: "https://bafybeif5bsnirtrgikhfgsbd4xjdqvnb43ddejaigegjkals2c3jkregce.ipfs.dweb.link/", name: "Видео 78" },
+        { url: "https://bafybeiexgriagwox7km7evlzt4nojbrfb3qno325pvgua4wb5lau2u3cbm.ipfs.dweb.link/", name: "Видео 79" },
+        { url: "https://bafybeidasxafpmdy74s5q7mpp5vqnk7r22da3qkcc3ajttaguq232sbzzm.ipfs.dweb.link/", name: "Видео 80" },
+        { url: "https://bafybeiebxl72yosgehwo4tgjvpbhfrnkuff2ycdost6obslrcf7ududh5q.ipfs.dweb.link/", name: "Видео 81" },
+        { url: "https://bafybeiciknnxpizgzvq2q37neqxa66axajvz6rlzri5v2fbyapmzj4dxdm.ipfs.dweb.link/", name: "Видео 82" },
+        { url: "https://bafybeicab6edalr5psuittovxfyyhd33egmbu4txovwmui72e52hlon6qi.ipfs.dweb.link/", name: "Видео 83" },
+        { url: "https://bafybeic4cm5yw7zzrb5gj4dxm2efhhpdjcvz47cwfdxvgqkc6vreq2sa34.ipfs.dweb.link/", name: "Видео 84" },
+        { url: "https://bafybeibt4lsd3hczcqdkdk34j3ykhb2u5da2c4475nildsfshdkryjqeru.ipfs.dweb.link/", name: "Видео 85" },
+        { url: "https://bafybeihktwepy4vhf57q5wttr5kuvmwxlnkof2judwjwbabjismycf7ft4.ipfs.dweb.link/", name: "Видео 86" },
+        { url: "https://bafybeiat56faeftx6iuob2n5bcdxwq66uka65hvmeqjfm5yj6zgp5ycn7i.ipfs.dweb.link/", name: "Видео 87" },
+        { url: "https://bafybeiboxxt3go4obtm6d5cguqy34g66hze2g2ijijsbz63papzflvd2sm.ipfs.dweb.link/", name: "Видео 88" },
+        { url: "https://bafybeify3ci7tw2e67rov2t35jdmcalc4olgsgea3zny4psg4d2zbvemu4.ipfs.dweb.link/", name: "Видео 89" },
+        { url: "https://bafybeicft2gq644qxr42glljcb6xz6iyhsbualz2wznojs2b7fyq2nyc5i.ipfs.dweb.link/", name: "Видео 90" },
+        { url: "https://bafybeidowrogzir2gvtibtree7vkftv3bgyneroleqrkqbiz5t4zdb6ara.ipfs.dweb.link/", name: "Видео 91" },
+        { url: "https://bafybeierwvd736gdg7r67jcrjejxzfmb6uyxqxpyqu4pjytcb5xev643zu.ipfs.dweb.link/", name: "Видео 92" },
+        { url: "https://bafybeib2wfh3bw6gl2o43zhoyet3gll4bzmbu44e2s7yo36xj4tvhhaof4.ipfs.dweb.link/", name: "Видео 93" },
+        { url: "https://bafybeibeoowh56hexx7dje6sp7uvrkjyxdb7qp2z34zhmnkibmfe5cxqbm.ipfs.dweb.link/", name: "Видео 94" },
+        { url: "https://bafybeibsotdwainc4c4jb36enzf44uiokhhjssp5fw45in7burlawgt27a.ipfs.dweb.link/", name: "Видео 95" },
+        { url: "https://bafybeifti5accp2uoa3yjifzktj4plrv2el6xsnk73muve5gkxsglcsbry.ipfs.dweb.link/", name: "Видео 96" },
+        { url: "https://bafybeie5yc2yxj62jitd6aypszzedypge4qrsxuolpomugvplqt3vv7f6i.ipfs.dweb.link/", name: "Видео 97" },
+        { url: "https://bafybeidmwx6hduko55ht62rxmxyiceh2l4ibpupgu7bu7fnp3yjq6n6ynq.ipfs.dweb.link/", name: "Видео 98" },
+        { url: "https://bafybeibkw4lkxwpe2e3jgp5nhvpiytehvl7nltup6shgb47oqljtaxvqy4.ipfs.dweb.link/", name: "Видео 99" },
+        { url: "https://bafybeiacd6mqtx3cw6ak7u5varmv4xyxwbztpqol7wtedrybe6llkmoxia.ipfs.dweb.link/", name: "Видео 100" },
+        { url: "https://bafybeih7jlvjdnoeuviik5g5g4w6yxstofpgmujrtaizc3zh6hliddea7y.ipfs.dweb.link/", name: "Видео 101" },
+        { url: "https://bafybeiaqcurhjwonzk3cxywf6qhhv7ybqdigis4myedvkor4skxxi4oxku.ipfs.dweb.link/", name: "Видео 102" },
+        { url: "https://bafybeigddboaufes35k5ooqttq6brsc4x7wz2dlpc3nrfxaa5craunhory.ipfs.dweb.link/", name: "Видео 103" },
+        { url: "https://bafybeibrqyp7qfbg4lwjnvbnokg5fiesfgojfvv7ntxo5luo5o5n6f6uru.ipfs.dweb.link/", name: "Видео 104" },
+        { url: "https://bafybeicmqpang2nxqikeso7qskvrdeczr7ij2wm64tvd5h74kmjyjxidxm.ipfs.dweb.link/", name: "Видео 105" },
+        { url: "https://bafybeid5xxor2smqbtxxknevncuwvvc6ovqvsfgk3t66hycil5sr4nijze.ipfs.dweb.link/", name: "Видео 106" },
+        { url: "https://bafybeidqul64ak553j45tbl5femodj6hxwa7gzd3wgdrpd563clnicrmw4.ipfs.dweb.link/", name: "Видео 107" },
+        { url: "https://bafybeievbs7emolubz62pa2f25klgqknbvv3lvbfs4pgn6t2t4sptaivx4.ipfs.dweb.link/", name: "Видео 108" },
+        { url: "https://bafybeidyij5ij4bafakcwdvb3katnytqwyjbbwx27ub3wws3uh3u5pm6iu.ipfs.dweb.link/", name: "Видео 109" },
+        { url: "https://bafybeicrkvkfrqbw4jtjrrvj3ogmvtrbz43fgx7khcykkbig6e44h2egyi.ipfs.dweb.link/", name: "Видео 110" },
+        { url: "https://bafybeihwnafe3mdswkmwyggckca4tdieoyr66o44kqssgco4kmp7av4cpa.ipfs.dweb.link/", name: "Видео 111" },
+        { url: "https://bafybeife5utwjufyru47hrzmwiyewdyna4pbtz7qqfixjk23l6gfwqage4.ipfs.dweb.link/", name: "Видео 112" },
+        { url: "https://bafybeiaso67bctbqj7cpmmiiy5vh76uvrc2o4bkciyoyugbcqswgtbk4na.ipfs.dweb.link/", name: "Видео 113" },
+        { url: "https://bafybeicbapztzhj5wq3kd2in2hs3ydsa5lfmqtqvpz3s2sv5lamqnuhm6i.ipfs.dweb.link/", name: "Видео 114" },
+        { url: "https://bafybeicg4tu7yidbktchpkizgluea54yoy3tawwc3zuaq46hgc3dmcwi2m.ipfs.dweb.link/", name: "Видео 115" },
+        { url: "https://bafybeiawn4jor2srbjfjwk34zji53a23f63kgkedj33mbfkkvhuwi3qcfa.ipfs.dweb.link/", name: "Видео 116" }
     ];
     
     renderGallery(items);
