@@ -219,27 +219,20 @@
         }
     };
 
-    // ========== ЗАГРУЗКА КОНТЕНТА ==========
-    // Вариант 1: прямой массив (замени на свои ссылки)
-    /*
-    const items = [
-    { 
-    type: "video", 
-    url: "https://bafybeid4gzt2ntmmwlbbot2fsuiamxlpca2zsvq4gdcazlqrvyqyplh62i.ipfs.dweb.link/", 
-    name: "Видео 1" 
-    }
-];
-    // Фильтрация по дате (последние 30 дней)
-    const now = new Date();
-    const cutoff = new Date();
-    cutoff.setDate(now.getDate() - 30);
-    const filtered = items.filter(i => new Date(i.date) > cutoff);
-    renderGallery(filtered);
-    */
-    
+        closeModal.onclick = () => {
+        modal.classList.remove('active');
+        modalContent.innerHTML = '';
+    };
+
+    modal.onclick = (e) => {
+        if (e.target === modal) {
+            modal.classList.remove('active');
+            modalContent.innerHTML = '';
+        }
+    };
+
     // Прямой массив с видео (IPFS)
     const items = [
-        { type: "video", url: "https://bafybeid4gzt2ntmmwlbbot2fsuiamxlpca2zsvq4gdcazlqrvyqyplh62i.ipfs.dweb.link/", name: "Видео 0" }
         { type: "video", url: "https://bafybeigthleomhx3di7htzs56k6csuvvrp6lddninmsgihyroo6e5r66sy.ipfs.dweb.link/", name: "Видео 1" },
         { type: "video", url: "https://bafybeihp4pfqavyvj2mpocruzsa6hdp67bs4mdbbw3pwnc6kpliscnsdga.ipfs.dweb.link/", name: "Видео 2" },
         { type: "video", url: "https://bafybeidwi7eq55eyvti6spr42jgkbszxztgivut4t2g7wtfrusffgadxu4.ipfs.dweb.link/", name: "Видео 3" },
@@ -279,7 +272,6 @@
         { type: "video", url: "https://bafkreiaaw67kitu5dnvjzhsyqdjp6fwmtnfcbaprhcfmsiqdvmgzgysyl4.ipfs.dweb.link/", name: "Видео 37" }
     ];
     
-    renderGallery(items);
     renderGallery(items);
 </script>
 </body>
