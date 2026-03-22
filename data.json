@@ -1,0 +1,22 @@
+{
+    "items": [
+        {
+            "type": "video",
+            "url": "https://pixeldrain.com/api/file/DA3weKAr",
+            "name": "Видео 1",
+            "date": "2025-03-22"
+        },
+        {
+            "type": "video",
+            "url": "https://pixeldrain.com/api/file/GX85ZRZs",
+            "name": "Видео 2",
+            "date": "2025-03-22"
+        },
+        {
+            "type": "video",
+            "url": "https://pixeldrain.com/api/file/xSnbzdoj",
+            "name": "Видео 3",
+            "date": "2025-03-22"
+        }
+    ]
+}
