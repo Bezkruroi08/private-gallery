@@ -142,12 +142,15 @@
 
     // Функция для определения типа медиа по расширению в URL
     function getMediaType(url) {
-        if (url.endsWith('.mp4') || url.endsWith('.MOV')) {
-            return 'video';
+        // Если в ссылке есть ключевые слова, характерные для фото
+        if (url.includes('bafkre') && !url.includes('bafybeibqg') && !url.includes('bafybeihsu') && !url.includes('bafybeidig') && !url.includes('bafybeieym')) {
+            // Простой способ: считаем, что фото — это только те, которые мы явно назвали "Фото"
+            // Но лучше: проверяем, что имя элемента содержит "Фото"
+            return 'image';
         }
-        return 'image';
+        // Всё остальное считаем видео
+        return 'video';
     }
-
     function renderGallery(items) {
         gallery.innerHTML = '';
         items.forEach((item, index) => {
