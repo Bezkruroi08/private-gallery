@@ -223,9 +223,12 @@
     // Вариант 1: прямой массив (замени на свои ссылки)
     /*
     const items = [
-        { type: "image", url: "https://pixeldrain.com/api/file/ВАШ_КОД", name: "Фото 1", date: "2025-03-20" },
-        { type: "video", url: "https://pixeldrain.com/api/file/ВАШ_КОД", name: "Видео 1", date: "2025-03-18" }
-    ];
+    { 
+    type: "video", 
+    url: "https://bafybeid4gzt2ntmmwlbbot2fsuiamxlpca2zsvq4gdcazlqrvyqyplh62i.ipfs.dweb.link/", 
+    name: "Видео 1" 
+    }
+];
     // Фильтрация по дате (последние 30 дней)
     const now = new Date();
     const cutoff = new Date();
@@ -234,11 +237,9 @@
     renderGallery(filtered);
     */
     
-    // Прямой массив с видео
+    // Прямой массив с видео (IPFS)
     const items = [
-        { type: "video", url: "https://files.catbox.moe/se1u8n.mp4", name: "Видео 1" },
-        { type: "video", url: "https://files.catbox.moe/rwlecl.mp4", name: "Видео 2" },
-        { type: "video", url: "https://files.catbox.moe/mn1bxf.mp4", name: "Видео 3" }
+        { type: "video", url: "https://bafybeid4gzt2ntmmwlbbot2fsuiamxlpca2zsvq4gdcazlqrvyqyplh62i.ipfs.dweb.link/", name: "Видео 1" }
     ];
     
     renderGallery(items);
