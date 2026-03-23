@@ -1,6 +1,24 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
+    /* Запрет сохранения картинки через контекстное меню */
+img {
+    pointer-events: none;
+    -webkit-touch-callout: none;
+}
+
+/* Скрываем кнопку скачивания в некоторых браузерах */
+video::-internal-media-controls-download-button {
+    display: none;
+}
+
+video::-webkit-media-controls-enclosure {
+    overflow: hidden;
+}
+
+video::-webkit-media-controls-panel {
+    width: calc(100% + 30px);
+}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>Приватная галерея</title>
