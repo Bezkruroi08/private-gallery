@@ -1,24 +1,6 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    /* Запрет сохранения картинки через контекстное меню */
-img {
-    pointer-events: none;
-    -webkit-touch-callout: none;
-}
-
-/* Скрываем кнопку скачивания в некоторых браузерах */
-video::-internal-media-controls-download-button {
-    display: none;
-}
-
-video::-webkit-media-controls-enclosure {
-    overflow: hidden;
-}
-
-video::-webkit-media-controls-panel {
-    width: calc(100% + 30px);
-}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>Приватная галерея</title>
@@ -32,64 +14,10 @@ video::-webkit-media-controls-panel {
             background: #0a0a0a;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             padding: 20px;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
         }
-        <body oncontextmenu="return false;">
-        <script>
-    // ПАРОЛЬНАЯ ЗАЩИТА С АВТОМАТИЧЕСКИМ ИСТЕЧЕНИЕМ
-    // Меняй пароль и дату каждый месяц
-    
-    const VALID_PASSWORD = "апрель2026";
-    const VALID_UNTIL = "2026-04-30"; // формат: ГГГГ-ММ-ДД
-    
-    // Проверяем, не истёк ли срок
-    const today = new Date();
-    const expiryDate = new Date(VALID_UNTIL);
-    
-    let accessGranted = false;
-    
-    // Проверяем, есть ли сохранённая сессия
-    const savedSession = localStorage.getItem("priv_gallery_session");
-    const sessionValidUntil = localStorage.getItem("priv_gallery_expiry");
-    
-    if (savedSession && sessionValidUntil) {
-        const sessionDate = new Date(sessionValidUntil);
-        if (sessionDate > today) {
-            accessGranted = true;
-        }
-    }
-    
-    if (!accessGranted) {
-        const userPass = prompt("🔒 Введите пароль доступа:");
-        
-        if (userPass === VALID_PASSWORD && today <= expiryDate) {
-            // Сохраняем сессию на срок действия пароля
-            localStorage.setItem("priv_gallery_session", "true");
-            localStorage.setItem("priv_gallery_expiry", VALID_UNTIL);
-            accessGranted = true;
-        } else {
-            document.body.innerHTML = `
-                <div style="
-                    background: black;
-                    color: white;
-                    text-align: center;
-                    padding: 100px 20px;
-                    font-family: sans-serif;
-                    min-height: 100vh;
-                ">
-                    <h1 style="font-size: 32px;">🔒 Доступ закрыт</h1>
-                    <p style="margin: 20px 0; color: #aaa;">
-                        ${today > expiryDate ? 'Срок действия пароля истёк.' : 'Неверный пароль.'}
-                    </p>
-                    <p style="margin-top: 30px; font-size: 14px;">
-                        Доступ предоставляется только подписчикам Telegram-канала.<br>
-                        Продлите подписку, чтобы получить новый пароль.
-                    </p>
-                </div>
-            `;
-            throw new Error("Доступ запрещён");
-        }
-    }
-</script>
         h1 {
             color: white;
             text-align: center;
@@ -188,37 +116,64 @@ video::-webkit-media-controls-panel {
                 height: 140px;
             }
         }
-        /* Запрет выделения текста */
-body {
-    user-select: none;
-    -webkit-user-select: none;
-}
-
-/* Запрет контекстного меню (правая кнопка) */
-body {
-    -webkit-touch-callout: none;
-}
-
-/* Дополнительная защита для видео */
-video, img {
-    pointer-events: auto; /* оставляем кликабельными */
-}
-
-/* Скрываем меню скачивания в некоторых браузерах */
-video::-internal-media-controls-download-button {
-    display: none;
-}
-
-video::-webkit-media-controls-enclosure {
-    overflow: hidden;
-}
-
-video::-webkit-media-controls-panel {
-    width: calc(100% + 30px);
-}
+        /* Скрываем меню скачивания в некоторых браузерах */
+        video::-internal-media-controls-download-button {
+            display: none;
+        }
+        video::-webkit-media-controls-enclosure {
+            overflow: hidden;
+        }
+        video::-webkit-media-controls-panel {
+            width: calc(100% + 30px);
+        }
     </style>
+    <!-- ПАРОЛЬНАЯ ЗАЩИТА -->
+    <script>
+        // Меняй пароль и дату каждый месяц
+        const VALID_PASSWORD = "апрель2026";
+        const VALID_UNTIL = "2026-04-30"; // формат: ГГГГ-ММ-ДД
+        
+        const today = new Date();
+        const expiryDate = new Date(VALID_UNTIL);
+        
+        let accessGranted = false;
+        
+        const savedSession = localStorage.getItem("priv_gallery_session");
+        const sessionValidUntil = localStorage.getItem("priv_gallery_expiry");
+        
+        if (savedSession && sessionValidUntil) {
+            const sessionDate = new Date(sessionValidUntil);
+            if (sessionDate > today) {
+                accessGranted = true;
+            }
+        }
+        
+        if (!accessGranted) {
+            const userPass = prompt("🔒 Введите пароль доступа:");
+            
+            if (userPass === VALID_PASSWORD && today <= expiryDate) {
+                localStorage.setItem("priv_gallery_session", "true");
+                localStorage.setItem("priv_gallery_expiry", VALID_UNTIL);
+                accessGranted = true;
+            } else {
+                document.body.innerHTML = `
+                    <div style="background: black; color: white; text-align: center; padding: 100px 20px; font-family: sans-serif; min-height: 100vh;">
+                        <h1 style="font-size: 32px;">🔒 Доступ закрыт</h1>
+                        <p style="margin: 20px 0; color: #aaa;">
+                            ${today > expiryDate ? 'Срок действия пароля истёк.' : 'Неверный пароль.'}
+                        </p>
+                        <p style="margin-top: 30px; font-size: 14px;">
+                            Доступ предоставляется только подписчикам Telegram-канала.<br>
+                            Продлите подписку, чтобы получить новый пароль.
+                        </p>
+                    </div>
+                `;
+                throw new Error("Доступ запрещён");
+            }
+        }
+    </script>
 </head>
-<body>
+<body oncontextmenu="return false;">
 
 <!-- AGE GATE 18+ -->
 <div id="ageGate" style="position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:9999; display:flex; justify-content:center; align-items:center; flex-direction:column; color:white; text-align:center;">
@@ -306,7 +261,7 @@ video::-webkit-media-controls-panel {
         }
     };
 
-    // ========== МАССИВ С МЕДИАФАЙЛАМИ (только URL и название) ==========
+    // ========== МАССИВ С МЕДИАФАЙЛАМИ ==========
     const items = [
         { type: "video", url: "https://bafybeigthleomhx3di7htzs56k6csuvvrp6lddninmsgihyroo6e5r66sy.ipfs.dweb.link/", name: "Видео 1" },
         { type: "video", url: "https://bafybeihp4pfqavyvj2mpocruzsa6hdp67bs4mdbbw3pwnc6kpliscnsdga.ipfs.dweb.link/", name: "Видео 2" },
@@ -346,7 +301,7 @@ video::-webkit-media-controls-panel {
         { type: "image", url: "https://bafybeifs7hqmtaimnllj3el2unpf5w5iclh6crqykm4l5lxvk3gjmcwzva.ipfs.dweb.link/", name: "Фото 36" },
         { type: "image", url: "https://bafkreiaaw67kitu5dnvjzhsyqdjp6fwmtnfcbaprhcfmsiqdvmgzgysyl4.ipfs.dweb.link/", name: "Фото 37" },
         { type: "image", url: "https://bafkreif77r3gutphykjbqs2v5aubdfm72ajqwif55iuiwicaxytopfc3qi.ipfs.dweb.link/", name: "Фото 38" },
-        { type: "video", url: "https://bafybeiezp4csdswaa5xpul4q6dttl7567fhhw5mrnzjikxgrzc5uosizbq.ipfs.dweb.link/", name: "Фото 39" },
+        { type: "image", url: "https://bafybeiezp4csdswaa5xpul4q6dttl7567fhhw5mrnzjikxgrzc5uosizbq.ipfs.dweb.link/", name: "Фото 39" },
         { type: "video", url: "https://bafybeibqgme7kouqzkpyb2qudqhlibhrufpd3hgrildgqhyqttnnkbcbza.ipfs.dweb.link/", name: "Видео 40" },
         { type: "video", url: "https://bafybeihsu3yct6v6nwxzvop5mddeqspxwm75zxn4amkzx6b6udkg3lrxbq.ipfs.dweb.link/", name: "Видео 41" },
         { type: "video", url: "https://bafybeidiggvo5no2n47wpyidiey45oad5cfzw5l3xivgn7i6uo6dusfoxy.ipfs.dweb.link/", name: "Видео 42" },
@@ -383,8 +338,8 @@ video::-webkit-media-controls-panel {
         { type: "video", url: "https://bafybeif7urom2nyv4iiyfc5ahi7zaara7pv3t7vhgogagng52mkfgtnbi4.ipfs.dweb.link/", name: "Видео 73" },
         { type: "video", url: "https://bafybeigs3tmjbstt2ox6b36endjag3yvounnhivcnwryf43tu2jhqwgcwa.ipfs.dweb.link/", name: "Видео 74" },
         { type: "video", url: "https://bafybeieq4ckocasitexk4ax4xen2oln25p44gf3piwyaqc3a5xvxj5jdby.ipfs.dweb.link/", name: "Видео 75" },
-        { type: "video", url: "https://bafkreidusganbfrm4g4zcpn3qzxb2vwcwjwg4h466d3iwfdvnlfwgeyta4.ipfs.dweb.link/", name: "Фото 76" },
-        { type: "video", url: "https://bafkreidhajomwfelrc4jszn6ga5hz5sgvlajo7r4lnbdlr77b3trp2plte.ipfs.dweb.link/", name: "Фото 77" },
+        { type: "image", url: "https://bafkreidusganbfrm4g4zcpn3qzxb2vwcwjwg4h466d3iwfdvnlfwgeyta4.ipfs.dweb.link/", name: "Фото 76" },
+        { type: "image", url: "https://bafkreidhajomwfelrc4jszn6ga5hz5sgvlajo7r4lnbdlr77b3trp2plte.ipfs.dweb.link/", name: "Фото 77" },
         { type: "video", url: "https://bafybeif5bsnirtrgikhfgsbd4xjdqvnb43ddejaigegjkals2c3jkregce.ipfs.dweb.link/", name: "Видео 78" },
         { type: "video", url: "https://bafybeiexgriagwox7km7evlzt4nojbrfb3qno325pvgua4wb5lau2u3cbm.ipfs.dweb.link/", name: "Видео 79" },
         { type: "video", url: "https://bafybeidasxafpmdy74s5q7mpp5vqnk7r22da3qkcc3ajttaguq232sbzzm.ipfs.dweb.link/", name: "Видео 80" },
@@ -425,7 +380,6 @@ video::-webkit-media-controls-panel {
         { type: "video", url: "https://bafybeicg4tu7yidbktchpkizgluea54yoy3tawwc3zuaq46hgc3dmcwi2m.ipfs.dweb.link/", name: "Видео 115" },
         { type: "video", url: "https://bafybeiawn4jor2srbjfjwk34zji53a23f63kgkedj33mbfkkvhuwi3qcfa.ipfs.dweb.link/", name: "Видео 116" }
     ];
-
     
     renderGallery(items);
 </script>
