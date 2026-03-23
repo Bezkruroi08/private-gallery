@@ -127,10 +127,8 @@
             width: calc(100% + 30px);
         }
     </style>
-    <!-- ПАРОЛЬНАЯ ЗАЩИТА -->
     <script>
         // ТОКЕННАЯ ЗАЩИТА
-        // Получаем токен из URL
         const urlParams = new URLSearchParams(window.location.search);
         const token = urlParams.get('token');
         
@@ -228,13 +226,21 @@
             `;
         }
         
-        // Запускаем проверку
+        // Запускаем проверку и добавляем приветствие
         checkToken().then(granted => {
             if (!granted) {
                 throw new Error("Доступ запрещён");
             }
-            <!-- Приветствие -->
-<div id="userGreeting" style="text-align: right; color: #aaa; font-size: 12px; margin-bottom: 10px;"></div>
+            
+            // Добавляем приветствие после успешной проверки
+            const greetingDiv = document.createElement('div');
+            greetingDiv.id = 'userGreeting';
+            greetingDiv.style.cssText = 'text-align: right; color: #aaa; font-size: 12px; margin-bottom: 10px;';
+            greetingDiv.innerHTML = `👋 ${userName} | Тариф: ${planName} | До ${expiryDate}`;
+            
+            // Вставляем приветствие после h1
+            const title = document.querySelector('h1');
+            title.insertAdjacentElement('afterend', greetingDiv);
         });
     </script>
 </head>
