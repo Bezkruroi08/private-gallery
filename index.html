@@ -129,47 +129,80 @@
     </style>
     <!-- ПАРОЛЬНАЯ ЗАЩИТА -->
     <script>
-        // Меняй пароль и дату каждый месяц
+        // ПАРОЛЬНАЯ ЗАЩИТА
         const VALID_PASSWORD = "апрель2026";
-        const VALID_UNTIL = "2026-04-30"; // формат: ГГГГ-ММ-ДД
+        const VALID_UNTIL = "2026-04-30";
         
-        const today = new Date();
-        const expiryDate = new Date(VALID_UNTIL);
-        
-        let accessGranted = false;
-        
-        const savedSession = localStorage.getItem("priv_gallery_session");
-        const sessionValidUntil = localStorage.getItem("priv_gallery_expiry");
-        
-        if (savedSession && sessionValidUntil) {
-            const sessionDate = new Date(sessionValidUntil);
-            if (sessionDate > today) {
-                accessGranted = true;
+        function checkAccess() {
+            const today = new Date();
+            const expiryDate = new Date(VALID_UNTIL);
+            
+            // Проверяем сохранённую сессию
+            const savedSession = localStorage.getItem("priv_gallery_session");
+            const sessionValidUntil = localStorage.getItem("priv_gallery_expiry");
+            
+            if (savedSession && sessionValidUntil) {
+                const sessionDate = new Date(sessionValidUntil);
+                if (sessionDate > today) {
+                    return true;
+                }
             }
+            
+            // Запрашиваем пароль
+            let userPass = null;
+            let attempts = 0;
+            const maxAttempts = 3;
+            
+            while (attempts < maxAttempts) {
+                userPass = prompt("🔒 Введите пароль доступа:");
+                
+                // Если нажали "Отмена"
+                if (userPass === null) {
+                    attempts++;
+                    if (attempts < maxAttempts) {
+                        alert(`Доступ запрещён. Осталось попыток: ${maxAttempts - attempts}`);
+                    }
+                    continue;
+                }
+                
+                // Проверяем пароль
+                if (userPass === VALID_PASSWORD && today <= expiryDate) {
+                    localStorage.setItem("priv_gallery_session", "true");
+                    localStorage.setItem("priv_gallery_expiry", VALID_UNTIL);
+                    return true;
+                } else {
+                    attempts++;
+                    if (attempts < maxAttempts) {
+                        alert(`Неверный пароль. Осталось попыток: ${maxAttempts - attempts}`);
+                    }
+                }
+            }
+            
+            // Если все попытки исчерпаны или нажали "Отмена" 3 раза
+            showBlockScreen(today > expiryDate);
+            return false;
         }
         
-        if (!accessGranted) {
-            const userPass = prompt("🔒 Введите пароль доступа:");
-            
-            if (userPass === VALID_PASSWORD && today <= expiryDate) {
-                localStorage.setItem("priv_gallery_session", "true");
-                localStorage.setItem("priv_gallery_expiry", VALID_UNTIL);
-                accessGranted = true;
-            } else {
-                document.body.innerHTML = `
-                    <div style="background: black; color: white; text-align: center; padding: 100px 20px; font-family: sans-serif; min-height: 100vh;">
-                        <h1 style="font-size: 32px;">🔒 Доступ закрыт</h1>
-                        <p style="margin: 20px 0; color: #aaa;">
-                            ${today > expiryDate ? 'Срок действия пароля истёк.' : 'Неверный пароль.'}
-                        </p>
-                        <p style="margin-top: 30px; font-size: 14px;">
-                            Доступ предоставляется только подписчикам Telegram-канала.<br>
-                            Продлите подписку, чтобы получить новый пароль.
-                        </p>
-                    </div>
-                `;
-                throw new Error("Доступ запрещён");
-            }
+        function showBlockScreen(isExpired) {
+            document.body.innerHTML = `
+                <div style="background: black; color: white; text-align: center; padding: 100px 20px; font-family: sans-serif; min-height: 100vh;">
+                    <h1 style="font-size: 32px;">🔒 Доступ закрыт</h1>
+                    <p style="margin: 20px 0; color: #aaa;">
+                        ${isExpired ? 'Срок действия пароля истёк.' : 'Неверный пароль.'}
+                    </p>
+                    <p style="margin-top: 30px; font-size: 14px;">
+                        Доступ предоставляется только подписчикам Telegram-канала.<br>
+                        Продлите подписку, чтобы получить новый пароль.
+                    </p>
+                    <button onclick="location.reload()" style="margin-top: 30px; padding: 10px 30px; background: #ff4444; color: white; border: none; border-radius: 8px; cursor: pointer;">Попробовать снова</button>
+                </div>
+            `;
+        }
+        
+        // Запускаем проверку
+        if (!checkAccess()) {
+            // Останавливаем выполнение страницы
+            throw new Error("Доступ запрещён");
         }
     </script>
 </head>
