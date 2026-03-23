@@ -129,81 +129,113 @@
     </style>
     <!-- ПАРОЛЬНАЯ ЗАЩИТА -->
     <script>
-        // ПАРОЛЬНАЯ ЗАЩИТА
-        const VALID_PASSWORD = "апрель2026";
-        const VALID_UNTIL = "2026-04-30";
+        // ТОКЕННАЯ ЗАЩИТА
+        // Получаем токен из URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const token = urlParams.get('token');
         
-        function checkAccess() {
-            const today = new Date();
-            const expiryDate = new Date(VALID_UNTIL);
-            
-            // Проверяем сохранённую сессию
-            const savedSession = localStorage.getItem("priv_gallery_session");
-            const sessionValidUntil = localStorage.getItem("priv_gallery_expiry");
-            
-            if (savedSession && sessionValidUntil) {
-                const sessionDate = new Date(sessionValidUntil);
-                if (sessionDate > today) {
-                    return true;
-                }
+        let accessGranted = false;
+        let userName = "";
+        let planName = "";
+        let expiryDate = null;
+        
+        async function checkToken() {
+            if (!token) {
+                showNoTokenScreen();
+                return false;
             }
             
-            // Запрашиваем пароль
-            let userPass = null;
-            let attempts = 0;
-            const maxAttempts = 3;
-            
-            while (attempts < maxAttempts) {
-                userPass = prompt("🔒 Введите пароль доступа:");
+            try {
+                const response = await fetch('tokens.json');
+                const tokens = await response.json();
                 
-                // Если нажали "Отмена"
-                if (userPass === null) {
-                    attempts++;
-                    if (attempts < maxAttempts) {
-                        alert(`Доступ запрещён. Осталось попыток: ${maxAttempts - attempts}`);
+                if (tokens[token]) {
+                    const userData = tokens[token];
+                    const today = new Date();
+                    const expires = new Date(userData.expires);
+                    
+                    if (expires > today) {
+                        accessGranted = true;
+                        userName = userData.name;
+                        planName = userData.plan;
+                        expiryDate = userData.expires;
+                        return true;
+                    } else {
+                        showExpiredScreen(userData.name, userData.plan, userData.expires);
+                        return false;
                     }
-                    continue;
-                }
-                
-                // Проверяем пароль
-                if (userPass === VALID_PASSWORD && today <= expiryDate) {
-                    localStorage.setItem("priv_gallery_session", "true");
-                    localStorage.setItem("priv_gallery_expiry", VALID_UNTIL);
-                    return true;
                 } else {
-                    attempts++;
-                    if (attempts < maxAttempts) {
-                        alert(`Неверный пароль. Осталось попыток: ${maxAttempts - attempts}`);
-                    }
+                    showInvalidTokenScreen();
+                    return false;
                 }
+            } catch (error) {
+                console.error('Ошибка загрузки токенов:', error);
+                showErrorScreen();
+                return false;
             }
-            
-            // Если все попытки исчерпаны или нажали "Отмена" 3 раза
-            showBlockScreen(today > expiryDate);
-            return false;
         }
         
-        function showBlockScreen(isExpired) {
+        function showNoTokenScreen() {
             document.body.innerHTML = `
                 <div style="background: black; color: white; text-align: center; padding: 100px 20px; font-family: sans-serif; min-height: 100vh;">
-                    <h1 style="font-size: 32px;">🔒 Доступ закрыт</h1>
+                    <h1 style="font-size: 32px;">🔒 Доступ по приглашению</h1>
                     <p style="margin: 20px 0; color: #aaa;">
-                        ${isExpired ? 'Срок действия пароля истёк.' : 'Неверный пароль.'}
+                        Для доступа к галерее необходима индивидуальная ссылка-приглашение.
                     </p>
                     <p style="margin-top: 30px; font-size: 14px;">
-                        Доступ предоставляется только подписчикам Telegram-канала.<br>
-                        Продлите подписку, чтобы получить новый пароль.
+                        Приобретите доступ в Telegram-канале, чтобы получить свою ссылку.
                     </p>
-                    <button onclick="location.reload()" style="margin-top: 30px; padding: 10px 30px; background: #ff4444; color: white; border: none; border-radius: 8px; cursor: pointer;">Попробовать снова</button>
+                </div>
+            `;
+        }
+        
+        function showInvalidTokenScreen() {
+            document.body.innerHTML = `
+                <div style="background: black; color: white; text-align: center; padding: 100px 20px; font-family: sans-serif; min-height: 100vh;">
+                    <h1 style="font-size: 32px;">🔒 Неверная ссылка</h1>
+                    <p style="margin: 20px 0; color: #aaa;">
+                        Ссылка-приглашение недействительна.
+                    </p>
+                    <p style="margin-top: 30px; font-size: 14px;">
+                        Проверьте правильность ссылки или обратитесь к администратору.
+                    </p>
+                </div>
+            `;
+        }
+        
+        function showExpiredScreen(name, plan, expiredDate) {
+            document.body.innerHTML = `
+                <div style="background: black; color: white; text-align: center; padding: 100px 20px; font-family: sans-serif; min-height: 100vh;">
+                    <h1 style="font-size: 32px;">🔒 Срок доступа истёк</h1>
+                    <p style="margin: 20px 0; color: #aaa;">
+                        ${name}, ваш тариф "${plan}" действовал до ${expiredDate}.
+                    </p>
+                    <p style="margin-top: 30px; font-size: 14px;">
+                        Продлите подписку в Telegram-канале, чтобы получить новую ссылку.
+                    </p>
+                </div>
+            `;
+        }
+        
+        function showErrorScreen() {
+            document.body.innerHTML = `
+                <div style="background: black; color: white; text-align: center; padding: 100px 20px; font-family: sans-serif; min-height: 100vh;">
+                    <h1 style="font-size: 32px;">⚠️ Ошибка</h1>
+                    <p style="margin: 20px 0; color: #aaa;">
+                        Не удалось проверить доступ. Попробуйте позже.
+                    </p>
                 </div>
             `;
         }
         
         // Запускаем проверку
-        if (!checkAccess()) {
-            // Останавливаем выполнение страницы
-            throw new Error("Доступ запрещён");
-        }
+        checkToken().then(granted => {
+            if (!granted) {
+                throw new Error("Доступ запрещён");
+            }
+            <!-- Приветствие -->
+<div id="userGreeting" style="text-align: right; color: #aaa; font-size: 12px; margin-bottom: 10px;"></div>
+        });
     </script>
 </head>
 <body oncontextmenu="return false;">
