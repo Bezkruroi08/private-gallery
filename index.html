@@ -51,6 +51,26 @@
         }
         .item video {
             pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .item video.loaded {
+            opacity: 1;
+        }
+        .item .placeholder {
+            width: 100%;
+            height: 180px;
+            background: linear-gradient(90deg, #1a1a1a 25%, #2a2a2a 50%, #1a1a1a 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-size: 14px;
+        }
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
         }
         .info {
             padding: 10px;
@@ -103,20 +123,20 @@
             margin-top: 15px;
             font-size: 14px;
         }
-        .item video {
-            background: #1a1a1a url('https://img.icons8.com/ios-filled/50/ffffff/play-button-circled.png') no-repeat center;
-            background-size: 48px;
+        .loader {
+            color: white;
+            text-align: center;
+            padding: 20px;
         }
         @media (max-width: 600px) {
             .gallery {
                 grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
                 gap: 10px;
             }
-            .item img, .item video {
+            .item img, .item video, .item .placeholder {
                 height: 140px;
             }
         }
-        /* Скрываем меню скачивания в некоторых браузерах */
         video::-internal-media-controls-download-button {
             display: none;
         }
@@ -127,122 +147,6 @@
             width: calc(100% + 30px);
         }
     </style>
-    <script>
-        // ТОКЕННАЯ ЗАЩИТА
-        const urlParams = new URLSearchParams(window.location.search);
-        const token = urlParams.get('token');
-        
-        let accessGranted = false;
-        let userName = "";
-        let planName = "";
-        let expiryDate = null;
-        
-        async function checkToken() {
-            if (!token) {
-                showNoTokenScreen();
-                return false;
-            }
-            
-            try {
-                const response = await fetch('tokens.json');
-                const tokens = await response.json();
-                
-                if (tokens[token]) {
-                    const userData = tokens[token];
-                    const today = new Date();
-                    const expires = new Date(userData.expires);
-                    
-                    if (expires > today) {
-                        accessGranted = true;
-                        userName = userData.name;
-                        planName = userData.plan;
-                        expiryDate = userData.expires;
-                        return true;
-                    } else {
-                        showExpiredScreen(userData.name, userData.plan, userData.expires);
-                        return false;
-                    }
-                } else {
-                    showInvalidTokenScreen();
-                    return false;
-                }
-            } catch (error) {
-                console.error('Ошибка загрузки токенов:', error);
-                showErrorScreen();
-                return false;
-            }
-        }
-        
-        function showNoTokenScreen() {
-            document.body.innerHTML = `
-                <div style="background: black; color: white; text-align: center; padding: 100px 20px; font-family: sans-serif; min-height: 100vh;">
-                    <h1 style="font-size: 32px;">🔒 Доступ по приглашению</h1>
-                    <p style="margin: 20px 0; color: #aaa;">
-                        Для доступа к галерее необходима индивидуальная ссылка-приглашение.
-                    </p>
-                    <p style="margin-top: 30px; font-size: 14px;">
-                        Приобретите доступ в Telegram-канале, чтобы получить свою ссылку.
-                    </p>
-                </div>
-            `;
-        }
-        
-        function showInvalidTokenScreen() {
-            document.body.innerHTML = `
-                <div style="background: black; color: white; text-align: center; padding: 100px 20px; font-family: sans-serif; min-height: 100vh;">
-                    <h1 style="font-size: 32px;">🔒 Неверная ссылка</h1>
-                    <p style="margin: 20px 0; color: #aaa;">
-                        Ссылка-приглашение недействительна.
-                    </p>
-                    <p style="margin-top: 30px; font-size: 14px;">
-                        Проверьте правильность ссылки или обратитесь к администратору.
-                    </p>
-                </div>
-            `;
-        }
-        
-        function showExpiredScreen(name, plan, expiredDate) {
-            document.body.innerHTML = `
-                <div style="background: black; color: white; text-align: center; padding: 100px 20px; font-family: sans-serif; min-height: 100vh;">
-                    <h1 style="font-size: 32px;">🔒 Срок доступа истёк</h1>
-                    <p style="margin: 20px 0; color: #aaa;">
-                        ${name}, ваш тариф "${plan}" действовал до ${expiredDate}.
-                    </p>
-                    <p style="margin-top: 30px; font-size: 14px;">
-                        Продлите подписку в Telegram-канале, чтобы получить новую ссылку.
-                    </p>
-                </div>
-            `;
-        }
-        
-        function showErrorScreen() {
-            document.body.innerHTML = `
-                <div style="background: black; color: white; text-align: center; padding: 100px 20px; font-family: sans-serif; min-height: 100vh;">
-                    <h1 style="font-size: 32px;">⚠️ Ошибка</h1>
-                    <p style="margin: 20px 0; color: #aaa;">
-                        Не удалось проверить доступ. Попробуйте позже.
-                    </p>
-                </div>
-            `;
-        }
-        
-        // Запускаем проверку и добавляем приветствие
-        checkToken().then(granted => {
-            if (!granted) {
-                throw new Error("Доступ запрещён");
-            }
-            
-            // Добавляем приветствие после успешной проверки
-            const greetingDiv = document.createElement('div');
-            greetingDiv.id = 'userGreeting';
-            greetingDiv.style.cssText = 'text-align: right; color: #aaa; font-size: 12px; margin-bottom: 10px;';
-            greetingDiv.innerHTML = `👋 ${userName} | Тариф: ${planName} | До ${expiryDate}`;
-            
-            // Вставляем приветствие после h1
-            const title = document.querySelector('h1');
-            title.insertAdjacentElement('afterend', greetingDiv);
-        });
-    </script>
 </head>
 <body oncontextmenu="return false;">
 
@@ -269,37 +173,82 @@
     const modalTitle = document.getElementById('modalTitle');
     const closeModal = document.getElementById('closeModal');
 
+    // ========== ОПТИМИЗИРОВАННАЯ ФУНКЦИЯ ГАЛЕРЕИ ==========
     function renderGallery(items) {
         gallery.innerHTML = '';
+        
+        // Наблюдатель для ленивой загрузки
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const div = entry.target;
+                    const item = div._item;
+                    
+                    if (item.type === 'video') {
+                        const video = document.createElement('video');
+                        video.src = item.url;
+                        video.preload = 'metadata';
+                        video.muted = true;
+                        video.playsInline = true;
+                        video.style.width = '100%';
+                        video.style.height = '180px';
+                        video.style.objectFit = 'cover';
+                        video.style.background = '#1a1a1a';
+                        // Показываем первый кадр
+                        video.addEventListener('loadedmetadata', () => {
+                            video.currentTime = 0.1;
+                            video.classList.add('loaded');
+                        });
+                        div.appendChild(video);
+                    } else {
+                        const img = document.createElement('img');
+                        img.src = item.url;
+                        img.loading = 'lazy';
+                        img.alt = item.name;
+                        img.style.width = '100%';
+                        img.style.height = '180px';
+                        img.style.objectFit = 'cover';
+                        div.insertBefore(img, div.firstChild);
+                    }
+                    
+                    observer.unobserve(div);
+                }
+            });
+        }, { rootMargin: '200px' });
+        
+        // Создаём элементы-заглушки
         items.forEach((item, index) => {
             const div = document.createElement('div');
             div.className = 'item';
             div.onclick = () => openModal(index, items);
+            div._item = item;
             
-            if (item.type === 'video') {
-                const video = document.createElement('video');
-                video.src = item.url;
-                video.preload = 'metadata';
-                div.appendChild(video);
-            } else {
-                const img = document.createElement('img');
-                img.src = item.url;
-                img.loading = 'lazy';
-                div.appendChild(img);
-            }
+            // Заглушка
+            const placeholder = document.createElement('div');
+            placeholder.className = 'placeholder';
+            placeholder.textContent = item.type === 'video' ? '🎬' : '📷';
+            div.appendChild(placeholder);
             
             const info = document.createElement('div');
             info.className = 'info';
-            info.textContent = item.name || (item.type === 'video' ? '🎬 Видео' : '📷 Фото');
+            info.textContent = item.name;
             div.appendChild(info);
             
             gallery.appendChild(div);
+            observer.observe(div);
         });
     }
 
+    // ========== ОПТИМИЗИРОВАННОЕ МОДАЛЬНОЕ ОКНО ==========
     function openModal(index, items) {
         const item = items[index];
         modalContent.innerHTML = '';
+        
+        // Индикатор загрузки
+        const loader = document.createElement('div');
+        loader.className = 'loader';
+        loader.textContent = '⏳ Загрузка...';
+        modalContent.appendChild(loader);
         
         if (item.type === 'video') {
             const video = document.createElement('video');
@@ -308,15 +257,33 @@
             video.autoplay = true;
             video.style.maxWidth = '100%';
             video.style.maxHeight = '80vh';
-            modalContent.appendChild(video);
+            
+            video.oncanplay = () => {
+                modalContent.removeChild(loader);
+                modalContent.appendChild(video);
+            };
+            
+            video.onerror = () => {
+                loader.textContent = '❌ Ошибка загрузки видео. Попробуйте позже.';
+                setTimeout(() => modal.classList.remove('active'), 2000);
+            };
         } else {
             const img = document.createElement('img');
             img.src = item.url;
             img.alt = item.name;
-            modalContent.appendChild(img);
+            
+            img.onload = () => {
+                modalContent.removeChild(loader);
+                modalContent.appendChild(img);
+            };
+            
+            img.onerror = () => {
+                loader.textContent = '❌ Ошибка загрузки фото. Попробуйте позже.';
+                setTimeout(() => modal.classList.remove('active'), 2000);
+            };
         }
         
-        modalTitle.textContent = item.name || (item.type === 'video' ? 'Видео' : 'Фото');
+        modalTitle.textContent = item.name;
         modal.classList.add('active');
     }
 
@@ -509,13 +476,13 @@
         { type: "video", url: "https://bafybeicrkhmm7ttwmefqtyhezps7zt6uae6t7h5wl2kpttmetm7q7lqn2a.ipfs.dweb.link/", name: "Видео 173" },
         { type: "video", url: "https://bafybeih5x4ggc4hyfp7ohpwsj4ep5ncvnzz6tl2gqod3g7zf6ewxtua3ui.ipfs.dweb.link/", name: "Видео 174" },
         { type: "video", url: "https://bafybeid5arcm2xaso6xj5n2yevjgwuibnonq3jg7brg62gbvujqmwoitzm.ipfs.dweb.link/", name: "Видео 175" },
-        { type: "image", url: "https://bafkreiaoo5cskz5kjxgu674xgta2k7fxxdbcfvig6skbpnhdobeennzwka.ipfs.dweb.link/", name: "Видео 176" },
-        { type: "image", url: "https://bafybeihig75fokaxylwmi4mi6rtwqnk7tz4mc4et2ktjaru2ylsvdfmk3q.ipfs.dweb.link/", name: "Видео 177" },
-        { type: "image", url: "https://bafkreihnbt3ouufws6mahml4rjbz56puiu7txdyhwu3zpx24bynucf4wyq.ipfs.dweb.link/", name: "Видео 178" },
-        { type: "image", url: "https://bafkreicjogdv2gbaetk7rsjju3ltnml45iifx7lniuz4mgknzfrcqhy66a.ipfs.dweb.link/", name: "Видео 179" },
-        { type: "image", url: "https://bafkreibgk3fklxlhn3o3oj4fwsshcfm24jaebq6f7a5qvo4kh7hm7bgyaa.ipfs.dweb.link/", name: "Видео 180" },
-        { type: "image", url: "https://bafybeidwajfh6ofxqomoyxrg4v76dkd7i56a6d4osvwnk7omauelsczevq.ipfs.dweb.link/", name: "Видео 181" },
-        { type: "image", url: "https://bafkreicuyhp26srox7uydbqgpe27ojljfdziziodtswghhhgb7jyxnajlm.ipfs.dweb.link/", name: "Видео 182" },
+        { type: "image", url: "https://bafkreiaoo5cskz5kjxgu674xgta2k7fxxdbcfvig6skbpnhdobeennzwka.ipfs.dweb.link/", name: "Фото 176" },
+        { type: "image", url: "https://bafybeihig75fokaxylwmi4mi6rtwqnk7tz4mc4et2ktjaru2ylsvdfmk3q.ipfs.dweb.link/", name: "Фото 177" },
+        { type: "image", url: "https://bafkreihnbt3ouufws6mahml4rjbz56puiu7txdyhwu3zpx24bynucf4wyq.ipfs.dweb.link/", name: "Фото 178" },
+        { type: "image", url: "https://bafkreicjogdv2gbaetk7rsjju3ltnml45iifx7lniuz4mgknzfrcqhy66a.ipfs.dweb.link/", name: "Фото 179" },
+        { type: "image", url: "https://bafkreibgk3fklxlhn3o3oj4fwsshcfm24jaebq6f7a5qvo4kh7hm7bgyaa.ipfs.dweb.link/", name: "Фото 180" },
+        { type: "image", url: "https://bafybeidwajfh6ofxqomoyxrg4v76dkd7i56a6d4osvwnk7omauelsczevq.ipfs.dweb.link/", name: "Фото 181" },
+        { type: "image", url: "https://bafkreicuyhp26srox7uydbqgpe27ojljfdziziodtswghhhgb7jyxnajlm.ipfs.dweb.link/", name: "Фото 182" },
         { type: "video", url: "https://bafybeidutaagwm635ymlulzsqptwoa4egtfq2p4hvke4vrrr5aca3hhaqy.ipfs.dweb.link/", name: "Видео 183" },
         { type: "video", url: "https://bafybeic5eemw2jvjbypw5tfmy2qex5wfff75avcckdgnnqu2lhtsdji6uq.ipfs.dweb.link/", name: "Видео 184" },
         { type: "video", url: "https://bafybeiacfczqc7vtbfsfj2tujwtpedhrlkhvenvp2dcqwlba4uqtoqxwie.ipfs.dweb.link/", name: "Видео 185" },
@@ -528,7 +495,7 @@
         { type: "video", url: "https://bafybeifcuwfr274webetsfxyor4g3p5zbbk6a65jnfzosfsusadf46f3ha.ipfs.dweb.link/", name: "Видео 192" },
         { type: "video", url: "https://bafybeiao75xs463gfoqtvjco724uzewu5zfvx3cnlujvd346ngki5gogmq.ipfs.dweb.link/", name: "Видео 193" },
         { type: "video", url: "https://bafybeicm5aubmhv4vmh34z7v5szqpcj65drw6nzrxe3ag44ghrpwxiazai.ipfs.dweb.link/", name: "Видео 194" },
-        { type: "video", url: "https://bafybeieaqucbzyr5lvj7rebvl5u2e37mfk5r5yjgqlixmvilczskrxnmre.ipfs.dweb.link/", name: "Виデオ 195" },
+        { type: "video", url: "https://bafybeieaqucbzyr5lvj7rebvl5u2e37mfk5r5yjgqlixmvilczskrxnmre.ipfs.dweb.link/", name: "Видео 195" },
         { type: "video", url: "https://bafybeifgywm6gzzzkuwy23h7qknpmkvge5bmui5izcriz7jk5vfdia4n2e.ipfs.dweb.link/", name: "Видео 196" },
         { type: "video", url: "https://bafybeif5drjblrw7tocvj5j5jgsvizixj7pe44sgp63tecj2kbg5y2zopq.ipfs.dweb.link/", name: "Видео 197" },
         { type: "video", url: "https://bafybeiccmb2iomenzxk3cau4zbuxscv6wgz7tepuw6vpryszb4ah7jv64a.ipfs.dweb.link/", name: "Видео 198" },
@@ -597,7 +564,95 @@
         { type: "video", url: "https://bafybeiffty2abgbfstqp6tefuv2oicxvvq64ppl6b5qegpbcvj765tdake.ipfs.dweb.link/", name: "Видео 261" }
     ];
     
-    renderGallery(items);
+    // ========== ПРОВЕРКА ТОКЕНА ==========
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get('token');
+    
+    let userName = "";
+    let planName = "";
+    let expiryDate = "";
+    
+    async function checkToken() {
+        if (!token) {
+            showNoTokenScreen();
+            return false;
+        }
+        
+        try {
+            const response = await fetch(`check_token.php?token=${encodeURIComponent(token)}`);
+            const data = await response.json();
+            
+            if (data.valid) {
+                userName = data.name;
+                planName = data.plan;
+                expiryDate = data.expires;
+                
+                const greetingDiv = document.createElement('div');
+                greetingDiv.id = 'userGreeting';
+                greetingDiv.style.cssText = 'text-align: right; color: #aaa; font-size: 12px; margin-bottom: 10px;';
+                greetingDiv.innerHTML = `👋 ${userName} | Тариф: ${planName} | До ${expiryDate}`;
+                const title = document.querySelector('h1');
+                if (title) title.insertAdjacentElement('afterend', greetingDiv);
+                return true;
+            } else if (data.error === 'expired') {
+                showExpiredScreen(data.name, data.plan, data.expires);
+                return false;
+            } else {
+                showInvalidTokenScreen();
+                return false;
+            }
+        } catch (error) {
+            console.error('Ошибка проверки:', error);
+            showErrorScreen();
+            return false;
+        }
+    }
+    
+    function showNoTokenScreen() {
+        document.body.innerHTML = `
+            <div style="background: black; color: white; text-align: center; padding: 100px 20px; font-family: sans-serif; min-height: 100vh;">
+                <h1 style="font-size: 32px;">🔒 Доступ по приглашению</h1>
+                <p style="margin: 20px 0; color: #aaa;">Для доступа к галерее необходима индивидуальная ссылка-приглашение.</p>
+                <p style="margin-top: 30px; font-size: 14px;">Приобретите доступ в Telegram-канале, чтобы получить свою ссылку.</p>
+            </div>
+        `;
+    }
+    
+    function showInvalidTokenScreen() {
+        document.body.innerHTML = `
+            <div style="background: black; color: white; text-align: center; padding: 100px 20px; font-family: sans-serif; min-height: 100vh;">
+                <h1 style="font-size: 32px;">🔒 Неверная ссылка</h1>
+                <p style="margin: 20px 0; color: #aaa;">Ссылка-приглашение недействительна.</p>
+                <p style="margin-top: 30px; font-size: 14px;">Проверьте правильность ссылки или обратитесь к администратору.</p>
+            </div>
+        `;
+    }
+    
+    function showExpiredScreen(name, plan, expiredDate) {
+        document.body.innerHTML = `
+            <div style="background: black; color: white; text-align: center; padding: 100px 20px; font-family: sans-serif; min-height: 100vh;">
+                <h1 style="font-size: 32px;">🔒 Срок доступа истёк</h1>
+                <p style="margin: 20px 0; color: #aaa;">${name}, ваш тариф "${plan}" действовал до ${expiredDate}.</p>
+                <p style="margin-top: 30px; font-size: 14px;">Продлите подписку в Telegram-канале, чтобы получить новую ссылку.</p>
+            </div>
+        `;
+    }
+    
+    function showErrorScreen() {
+        document.body.innerHTML = `
+            <div style="background: black; color: white; text-align: center; padding: 100px 20px; font-family: sans-serif; min-height: 100vh;">
+                <h1 style="font-size: 32px;">⚠️ Ошибка</h1>
+                <p style="margin: 20px 0; color: #aaa;">Не удалось проверить доступ. Попробуйте позже.</p>
+            </div>
+        `;
+    }
+    
+    // Запускаем проверку перед загрузкой галереи
+    checkToken().then(granted => {
+        if (granted) {
+            renderGallery(items);
+        }
+    });
 </script>
 </body>
 </html>
